@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Gate</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: white;
+            padding: 40px;
+        }
+
+        .card {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(255,106,0,0.2);
+            border-left: 5px solid #ff6a00;
+            max-width: 600px;
+            margin: auto;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ff6a00;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: #2a2a2a;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: none;
+            height: 90px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .location-btn {
+            background: #333;
+            color: #ff6a00;
+        }
+
+        .location-btn:hover {
+            background: #444;
+        }
+
+        .submit-btn {
+            background: #ff6a00;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #ff8533;
+        }
+
+        .info-box {
+            background: #111;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .back-btn:hover {
+            background: #555;
+        }
+
+        .success-msg {
+            background: #002b1a;
+            padding: 18px;
+            border-radius: 8px;
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid #00ff88;
+        }
+
+        .error-msg {
+            background: #330000;
+            padding: 18px;
+            border-radius: 8px;
+            color: #ff3b3b;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid #ff3b3b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <a href="/dashboard/" class="back-btn">Back</a>
+
+    <h2>Add Gate – {{ current_taluk.name }}</h2>
+
+    <!-- ERROR MESSAGE -->
+    {% if error %}
+        <div class="error-msg">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- SUCCESS MESSAGE -->
+    {% if success %}
+        <div class="success-msg">
+            {{ success }}
+        </div>
+    {% endif %}
+
+    <div class="info-box">
+        ⚠ You can add gates only within your current active taluk.
+        All submissions require admin approval.
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Gate Name</label>
+        <input type="text" name="gate_name" placeholder="Enter gate name" required>
+
+        <label>Landmark Details</label>
+        <textarea name="landmark" placeholder="Nearby landmark or area description"></textarea>
+
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+
+        <button type="button" class="btn location-btn" onclick="getLocation()">
+            📍 Fetch Current Location
+        </button>
+
+        <button type="submit" class="btn submit-btn">
+            Submit for Approval
+        </button>
+    </form>
+
+</div>
+
+<script>
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById("latitude").value = position.coords.latitude;
+            document.getElementById("longitude").value = position.coords.longitude;
+            alert("Location captured successfully.");
+        }, function() {
+            alert("Unable to fetch location. Please enable GPS.");
+        });
+    } else {
+        alert("Geolocation not supported.");
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Railway Gate Map</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: white;
+        }
+
+        header {
+            background: #ff6a00;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+
+        .btn {
+            background: black;
+            color: #ff6a00;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    🚦 Live Railway Gate Map - Dakshina Kannada
+
+    <div>
+        <a href="/" class="btn">Home</a>
+        <a href="/dashboard/" class="btn">Dashboard</a>
+    </div>
+</header>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // Initialize map (centered around Karnataka)
+    var map = L.map('map').setView([12.9141, 74.8560], 10);
+
+    // OpenStreetMap tiles (FREE)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Gate data from Django
+    const gates = [
+        {% for gate in gates %}
+        {
+            name: "{{ gate.gate_name|escapejs }}",
+            lat: {{ gate.latitude }},
+            lon: {{ gate.longitude }},
+            status: "{{ gate.status }}",
+            taluk: "{{ gate.taluk.name|escapejs }}",
+            closed_at: "{{ gate.closed_at|date:'c' }}"
+        },
+        {% endfor %}
+    ];
+
+    gates.forEach(gate => {
+        let color = gate.status === "OPEN" ? "green" : "red";
+
+        let marker = L.circleMarker([gate.lat, gate.lon], {
+            color: color,
+            radius: 10,
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        let popupContent = `
+            <b>${gate.name}</b><br>
+            Taluk: ${gate.taluk}<br>
+            Status: <span style="color:${color}; font-weight:bold;">${gate.status}</span>
+        `;
+
+        // Show closed timer if closed
+        if (gate.status === "CLOSED" && gate.closed_at) {
+            const closedTime = new Date(gate.closed_at);
+            const now = new Date();
+            const diffSec = Math.floor((now - closedTime) / 1000);
+            const mins = Math.floor(diffSec / 60);
+            popupContent += `<br>⏱ Closed for: ${mins} minutes`;
+        }
+
+        marker.bindPopup(popupContent);
+    });
+</script>
+
+</body>
+</html>

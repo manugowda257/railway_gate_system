@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request Taluk Change</title>
+    <style>
+        body {
+            background: #0f0f0f;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            padding: 40px;
+        }
+
+        .card {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 12px;
+            border-left: 5px solid #ff6a00;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ff6a00;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #2a2a2a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ff6a00;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .success-msg {
+            background: #002b1a;
+            padding: 15px;
+            border-radius: 6px;
+            color: #00ff88;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .error-msg {
+            background: #330000;
+            padding: 15px;
+            border-radius: 6px;
+            color: #ff3b3b;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <h2>Change Taluk</h2>
+
+    <p>Current Taluk: <strong>{{ current_taluk.name }}</strong></p>
+
+    {% if error %}
+        <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+        <div class="success-msg">{{ success }}</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <select name="taluk_id" required>
+            <option value="">Select Taluk</option>
+            {% for taluk in taluks %}
+                <option value="{{ taluk.id }}">{{ taluk.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Request Change</button>
+    </form>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Railway Gate Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0f0f0f;
+            color: #ffffff;
+        }
+
+        header {
+            background: #ff6a00;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn {
+            background: black;
+            color: #ff6a00;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .card {
+            background: #1a1a1a;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255,106,0,0.15);
+            margin-bottom: 20px;
+            border-left: 4px solid #ff6a00;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #ff6a00;
+            font-size: 20px;
+        }
+
+        .gate-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .open {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .closed {
+            color: #ff3b3b;
+            font-weight: bold;
+        }
+
+        .timer {
+            margin-top: 6px;
+            font-size: 15px;
+            color: #ffae42;
+            font-weight: bold;
+        }
+
+        .distance {
+            margin-top: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffae42;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        /* 📱 MOBILE OPTIMIZATION */
+        @media (max-width: 600px) {
+            .title {
+                font-size: 16px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .gate-name {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="title">
+        🚦 Railway Gate Live Status
+    </div>
+
+    <div class="nav-buttons">
+        <a href="/map/" class="btn">🗺 Map</a>
+
+        {% if user.is_authenticated %}
+            <a href="/dashboard/" class="btn">Dashboard</a>
+            <a href="/logout/" class="btn">Logout</a>
+        {% else %}
+            <a href="/login/" class="btn">Operator Login</a>
+        {% endif %}
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Nearest Gate -->
+    <div class="card">
+        <h2>📍 Nearest Gate</h2>
+        <div id="nearest-gate">
+            Detecting your location...
+        </div>
+    </div>
+
+    <!-- All Gates -->
+    <div class="card">
+        <h2>🚧 All Approved Gates</h2>
+        <ul>
+            {% for gate in gates %}
+                <li>
+                    <div class="gate-name">{{ gate.gate_name }}</div>
+                    Taluk: {{ gate.taluk.name }}<br>
+
+                    Status:
+                    {% if gate.status == "OPEN" %}
+                        <span class="open">🟢 OPEN</span>
+                    {% else %}
+                        <span class="closed">🔴 CLOSED</span>
+
+                        {% if gate.closed_at %}
+                            <div class="timer" data-closed="{{ gate.closed_at|date:'c' }}">
+                                ⏱ Calculating duration...
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <br>
+                    <small style="color:#aaa;">
+                        Last Updated: {{ gate.last_updated }}
+                    </small>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+<div class="footer">
+    Smart Railway Gate Monitoring System | Karnataka
+</div>
+
+<script>
+function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const hrs = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    const remSecs = seconds % 60;
+
+    if (hrs > 0) {
+        return `${hrs}h ${remMins}m ${remSecs}s`;
+    }
+    return `${remMins}m ${remSecs}s`;
+}
+
+function updateTimers() {
+    const timers = document.querySelectorAll(".timer");
+    timers.forEach(timer => {
+        const closedAt = timer.getAttribute("data-closed");
+        if (!closedAt) return;
+
+        const closedTime = new Date(closedAt);
+        const now = new Date();
+        const diff = Math.floor((now - closedTime) / 1000);
+
+        if (diff >= 0) {
+            timer.innerHTML = "⏱ Closed for: " + formatDuration(diff);
+        }
+    });
+}
+
+setInterval(updateTimers, 1000);
+</script>
+
+</body>
+</html>
